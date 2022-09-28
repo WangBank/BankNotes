@@ -4,22 +4,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './src/Screens/HomeScreen';
 import SettingsScreen from './src/Screens/SettingsScreen';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { RootStore } from './src/Store/RootStore';
-import { Provider } from 'mobx-react';
-import { View } from 'react-native';
 
 
-export const rootStore = new RootStore();
+
 const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
-
-    <Provider {...rootStore}>
-       <HomeScreen
-        notesStore={rootStore.notesStore}
-       ></HomeScreen>
-       <NavigationContainer>
+    <NavigationContainer>
       <Tab.Navigator
         screenOptions={({ route }:{route:any}) => ({
           tabBarIcon: ({ focused, color, size }) => {
@@ -37,11 +29,9 @@ export default function App() {
           tabBarInactiveTintColor: 'gray',
         })}
       >
-        
+        <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarBadge: 3 }} />
         <Tab.Screen name="Settings" component={SettingsScreen} />
       </Tab.Navigator>
     </NavigationContainer>
-      </Provider>
-
   );
 }
