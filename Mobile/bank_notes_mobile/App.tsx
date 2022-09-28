@@ -1,37 +1,69 @@
-import * as React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeScreen from './src/Screens/HomeScreen';
-import SettingsScreen from './src/Screens/SettingsScreen';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import React from 'react'
+import {
+  View,
+  StyleSheet,
+} from 'react-native'
+import { observer, inject, Provider } from "mobx-react"
+import DealList from './src/components/DealList'
+import DealDetail from './src/components/DealDetail'
+import SearchBar from './src/components/SearchBar'
+import AppStore from './src/stores/AppStore'
+import stores from './src/stores'
 
 
-
-const Tab = createBottomTabNavigator();
-
-export default function App() {
-  return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={({ route }:{route:any}) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
-            if (route.name === 'Home') {
-              iconName = focused
-                ? 'home'
-                : 'home';
-            } else if (route.name === 'Settings') {
-              iconName = focused ? 'cog' : 'cog';
-            }
-            return <FontAwesome name={iconName ?? "home"} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: 'tomato',
-          tabBarInactiveTintColor: 'gray',
-        })}
-      >
-        <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarBadge: 3 }} />
-        <Tab.Screen name="Settings" component={SettingsScreen} />
-      </Tab.Navigator>
-    </NavigationContainer>
-  );
+export interface Props {
+  appStore: AppStore
 }
+
+@inject("appStore") @observer
+class App extends React.Component<Props> {
+
+  searchDeals = (searchTerm: string) => {
+    this.props.appStore.setSearchTerm(searchTerm)
+  }
+
+  setCurrentDeal = (dealId: string) => {
+    this.props.appStore.setCurrentDeal(dealId)
+  }
+
+  unsetCurrentDeal = () => {
+    this.props.appStore.unsetCurrentDeal()
+  }
+
+  render() {
+    const appStore = this.props.appStore
+    if (appStore.currentDealId) {
+      return (
+        <View style={styles.main}>
+          <DealDetail
+            initialDealData={appStore.currentDeal}
+            onBack={this.unsetCurrentDeal}
+          />
+        </View>
+      )
+    }
+
+    return (
+      <View style={styles.main}>
+        <SearchBar searchDeals={this.searchDeals} searchTerm={appStore.searchTerm.get()}/>
+        <DealList deals={appStore.deals} onItemPress={this.setCurrentDeal} />
+      </View>
+    )
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  main: {
+    marginTop: 30,
+  },
+  header: {
+    fontSize: 40,
+  },
+})
+
+export default App
